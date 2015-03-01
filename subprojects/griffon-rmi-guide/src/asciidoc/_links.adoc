@@ -1,0 +1,11 @@
+
+:link_rmi: link:http://en.wikipedia.org/wiki/Java_remote_method_invocation[Java RMI protocol, window="_blank"]
+
+:api_rmi_handler: link:api/griffon/plugins/rmi/RmiHandler.html[RmiHandler, window="_blank"]
+:api_rmiclient_callback: link:api/griffon/plugins/rmi/RmiClientCallback.html[RmiClientCallback, window="_blank"]
+:api_rmiclient_storage: link:api/griffon/plugins/rmi/RmiClientStorage.html[RmiClientStorage, window="_blank"]
+:api_rmi_aware: link:api/griffon/transform/RmiAware.html[@RmiAware, window="_blank"]
+
+:path_griffon_rmi_core: {rootdir}/subprojects/griffon-rmi-core
+:path_griffon_rmi_groovy_compile: {rootdir}/subprojects/griffon-rmi-groovy-compile
+

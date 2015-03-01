@@ -1,0 +1,68 @@
+
+[[_Usage]]
+= Usage
+
+The following sections describe how you may use this plugin in an project.
+
+== Configuration
+
+The plugin's <<_modules, module>> registers a `{api_rmi_handler}` helper class that defines the base contract
+for issuing RMI calls using an appropriate client class. This helper class has the following methods
+
+[source,java,options="nowrap"]
+.griffon.plugins.rmi.RmiHandler.java
+----
+include::{path_griffon_rmi_core}/src/main/java//griffon/plugins/rmi/RmiHandler.java[tags=methods,indent=0]
+----
+
+The following properties must be defined:
+
+[horizontal]
+host:: The host on which remote objects haven been registered. String. Default `localhost`.
+port:: The port on which objects were exported. Integer. Default `1099`.
+lazy:: Attempt a connection to the RMI registry as late as possible. Boolean. Default `true`.
+
+These methods will create a new client when invoked unless you define an `id:` attribute. When this attribute is supplied
+the client will be stored in a cache managed by their respective storage classes (`{api_rmiclient_storage}`).
+
+You can inject an instance of `{api_rmi_handler}` anywhere it's needed using `@Inject`.
+
+The `{api_rmiclient_callback}` callback is defined using a functional interface approach, which means you can apply
+lambda expressions if running with JDK8+ or closures if running Groovy.
+
+[source,java,options="nowrap"]
+.griffon.plugins.rmi.RmiCallback.java
+----
+include::{path_griffon_rmi_core}/src/main/java/griffon/plugins/rmi/RmiClientCallback.java[lines=28..-1]
+----
+
+== Example
+
+The following is a trivial usage of the `{api_rmi_handler}` inside a service
+
+[source,java,options="nowrap"]
+.CalculatorService.java
+----
+include::{path_griffon_rmi_core}/src/test/groovy/griffon/plugins/rmi/CalculatorService.java[lines=18..-1]
+----
+
+Here's the Groovy version of the same service
+
+[source,groovy,options="nowrap"]
+.GroovyCalculatorService.groovy
+----
+include::{path_griffon_rmi_core}/src/test/groovy/griffon/plugins/rmi/GroovyCalculatorService.groovy[lines=18..-1]
+----
+
+== AST Transformation
+
+You can apply the `{api_rmi_aware}` AST transformation on any class. This injects the behavior of `{api_rmi_handler}`
+into said class.
+
+== DSL Descriptors
+
+This plugin provides DSL descriptors for Intellij IDEA and Eclipse (provided you have the Groovy Eclipse plugin installed).
+These descriptors are found inside the `griffon-rmi-groovy-compile-{project-version}.jar`, with locations
+
+ * dsdl/griffon_rmi.dsld
+ * gdsl/griffon_rmi.gdsl
