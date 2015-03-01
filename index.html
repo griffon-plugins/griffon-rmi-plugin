@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="Andres Almiray">
+<title>Griffon Rmi Plugin</title>
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="./coderay-asciidoctor.css">
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<h1>Griffon Rmi Plugin</h1>
+<div class="details">
+<span id="author" class="author">Andres Almiray</span><br>
+<span id="revnumber">version 1.0.0</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_Usage">2. Usage</a>
+<ul class="sectlevel2">
+<li><a href="#_configuration">2.1. Configuration</a></li>
+<li><a href="#_example">2.2. Example</a></li>
+<li><a href="#_ast_transformation">2.3. AST Transformation</a></li>
+<li><a href="#_dsl_descriptors">2.4. DSL Descriptors</a></li>
+</ul>
+</li>
+<li><a href="#_configuration">3. Build Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_gradle">3.1. Gradle</a>
+<ul class="sectlevel3">
+<li><a href="#_automatic">3.1.1. Automatic</a></li>
+<li><a href="#_manual">3.1.2. Manual</a></li>
+</ul>
+</li>
+<li><a href="#_maven">3.2. Maven</a></li>
+</ul>
+</li>
+<li><a href="#_modules">4. Modules</a>
+<ul class="sectlevel2">
+<li><a href="#_rmi">4.1. Rmi</a></li>
+</ul>
+</li>
+<li><a href="#_links">5. Links</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction"><a class="anchor" href="#_introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This plugin enables the usage of the <a href="http://en.wikipedia.org/wiki/Java_remote_method_invocation" target="_blank">Java RMI protocol</a> on a Griffon application.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_Usage"><a class="anchor" href="#_Usage"></a>2. Usage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following sections describe how you may use this plugin in an project.</p>
+</div>
+<div class="sect2">
+<h3 id="_configuration"><a class="anchor" href="#_configuration"></a>2.1. Configuration</h3>
+<div class="paragraph">
+<p>The plugin&#8217;s <a href="#_modules">module</a> registers a <code><a href="api/griffon/plugins/rmi/RmiHandler.html" target="_blank">RmiHandler</a></code> helper class that defines the base contract
+for issuing RMI calls using an appropriate client class. This helper class has the following methods</p>
+</div>
+<div class="listingblock">
+<div class="title">griffon.plugins.rmi.RmiHandler.java</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="java"><span class="annotation">@Nullable</span>
+&lt;R&gt; R withRmi(<span class="annotation">@Nonnull</span> <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; params, <span class="annotation">@Nonnull</span> RmiClientCallback&lt;R&gt; callback) <span class="directive">throws</span> RmiException;
+
+<span class="type">void</span> destroyRmiClient(<span class="annotation">@Nonnull</span> <span class="predefined-type">String</span> clientId);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following properties must be defined:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+host
+</td>
+<td class="hdlist2">
+<p>The host on which remote objects haven been registered. String. Default <code>localhost</code>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+port
+</td>
+<td class="hdlist2">
+<p>The port on which objects were exported. Integer. Default <code>1099</code>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+lazy
+</td>
+<td class="hdlist2">
+<p>Attempt a connection to the RMI registry as late as possible. Boolean. Default <code>true</code>.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These methods will create a new client when invoked unless you define an <code>id:</code> attribute. When this attribute is supplied
+the client will be stored in a cache managed by their respective storage classes (<code><a href="api/griffon/plugins/rmi/RmiClientStorage.html" target="_blank">RmiClientStorage</a></code>).</p>
+</div>
+<div class="paragraph">
+<p>You can inject an instance of <code><a href="api/griffon/plugins/rmi/RmiHandler.html" target="_blank">RmiHandler</a></code> anywhere it&#8217;s needed using <code>@Inject</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code><a href="api/griffon/plugins/rmi/RmiClientCallback.html" target="_blank">RmiClientCallback</a></code> callback is defined using a functional interface approach, which means you can apply
+lambda expressions if running with JDK8+ or closures if running Groovy.</p>
+</div>
+<div class="listingblock">
+<div class="title">griffon.plugins.rmi.RmiCallback.java</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="java">    <span class="annotation">@Nullable</span>
+    R handle(<span class="annotation">@Nonnull</span> <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; params, <span class="annotation">@Nonnull</span> RmiClient client) <span class="directive">throws</span> RmiException;
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example"><a class="anchor" href="#_example"></a>2.2. Example</h3>
+<div class="paragraph">
+<p>The following is a trivial usage of the <code><a href="api/griffon/plugins/rmi/RmiHandler.html" target="_blank">RmiHandler</a></code> inside a service</p>
+</div>
+<div class="listingblock">
+<div class="title">CalculatorService.java</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="java"><span class="keyword">import</span> <span class="include">griffon.core.GriffonApplication</span>;
+<span class="keyword">import</span> <span class="include">griffon.core.artifact.GriffonService</span>;
+<span class="keyword">import</span> <span class="include">griffon.exceptions.GriffonException</span>;
+<span class="keyword">import</span> <span class="include">griffon.metadata.ArtifactProviderFor</span>;
+<span class="keyword">import</span> <span class="include">griffon.plugins.rmi.exceptions.RmiException</span>;
+<span class="keyword">import</span> <span class="include">griffon.util.CollectionUtils</span>;
+<span class="keyword">import</span> <span class="include">org.codehaus.griffon.runtime.core.artifact.AbstractGriffonService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.annotation.Nonnull</span>;
+<span class="keyword">import</span> <span class="include">javax.annotation.Nullable</span>;
+<span class="keyword">import</span> <span class="include">javax.inject.Inject</span>;
+<span class="keyword">import</span> <span class="include">java.rmi.RemoteException</span>;
+<span class="keyword">import</span> <span class="include">java.util.Map</span>;
+
+<span class="annotation">@ArtifactProviderFor</span>(GriffonService.class)
+<span class="directive">public</span> <span class="type">class</span> <span class="class">CalculatorService</span> <span class="directive">extends</span> AbstractGriffonService {
+    <span class="annotation">@Inject</span>
+    <span class="directive">private</span> RmiHandler rmiHandler;
+
+    <span class="annotation">@Inject</span>
+    <span class="directive">public</span> CalculatorService(<span class="annotation">@Nonnull</span> GriffonApplication application) {
+        <span class="local-variable">super</span>(application);
+    }
+
+    <span class="directive">public</span> <span class="predefined-type">Double</span> calculate(<span class="directive">final</span> <span class="type">double</span> num1, <span class="directive">final</span> <span class="type">double</span> num2) {
+        <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; params = CollectionUtils.&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt;map()
+            .e(<span class="string"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">client</span><span class="delimiter">&quot;</span></span>);
+        <span class="keyword">return</span> rmiHandler.withRmi(params,
+            <span class="keyword">new</span> RmiClientCallback&lt;<span class="predefined-type">Double</span>&gt;() {
+                <span class="annotation">@Nullable</span>
+                <span class="directive">public</span> <span class="predefined-type">Double</span> handle(<span class="annotation">@Nonnull</span> <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; params, <span class="annotation">@Nonnull</span> RmiClient client) <span class="directive">throws</span> RmiException {
+                    <span class="keyword">return</span> client.service(Calculator.NAME, <span class="keyword">new</span> UnaryConsumer&lt;Calculator, <span class="predefined-type">Double</span>&gt;() {
+                        <span class="annotation">@Override</span>
+                        <span class="directive">public</span> <span class="predefined-type">Double</span> consume(Calculator calculator) {
+                            <span class="keyword">try</span> {
+                                <span class="keyword">return</span> calculator.add(num1, num2);
+                            } <span class="keyword">catch</span> (<span class="exception">RemoteException</span> e) {
+                                <span class="keyword">throw</span> <span class="keyword">new</span> GriffonException(e);
+                            }
+                        }
+                    });
+                }
+            });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the Groovy version of the same service</p>
+</div>
+<div class="listingblock">
+<div class="title">GroovyCalculatorService.groovy</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="groovy"><span class="keyword">import</span> <span class="include">griffon.core.artifact.GriffonService</span>
+<span class="keyword">import</span> <span class="include">griffon.metadata.ArtifactProviderFor</span>
+
+<span class="keyword">import</span> <span class="include">javax.inject.Inject</span>
+
+<span class="annotation">@ArtifactProviderFor</span>(GriffonService)
+<span class="type">class</span> <span class="class">GroovyCalculatorService</span> {
+    <span class="annotation">@Inject</span>
+    <span class="directive">private</span> RmiHandler rmiHandler
+
+    <span class="predefined-type">Double</span> calculate(<span class="type">double</span> num1, <span class="type">double</span> num2) {
+        <span class="predefined-type">Map</span> params = [<span class="key">id</span>: <span class="string"><span class="delimiter">'</span><span class="content">client</span><span class="delimiter">'</span></span>, <span class="key">port</span>: <span class="integer">1199</span>]
+        rmiHandler.withRmi(params, { <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">Object</span>&gt; ps, RmiClient client -&gt;
+            client.service(Calculator.NAME) { Calculator calculator -&gt;
+                calculator.add(num1, num2)
+            }
+        })
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ast_transformation"><a class="anchor" href="#_ast_transformation"></a>2.3. AST Transformation</h3>
+<div class="paragraph">
+<p>You can apply the <code><a href="api/griffon/transform/RmiAware.html" target="_blank">@RmiAware</a></code> AST transformation on any class. This injects the behavior of <code><a href="api/griffon/plugins/rmi/RmiHandler.html" target="_blank">RmiHandler</a></code>
+into said class.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dsl_descriptors"><a class="anchor" href="#_dsl_descriptors"></a>2.4. DSL Descriptors</h3>
+<div class="paragraph">
+<p>This plugin provides DSL descriptors for Intellij IDEA and Eclipse (provided you have the Groovy Eclipse plugin installed).
+These descriptors are found inside the <code>griffon-rmi-groovy-compile-1.0.0.jar</code>, with locations</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>dsdl/griffon_rmi.dsld</p>
+</li>
+<li>
+<p>gdsl/griffon_rmi.gdsl</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration"><a class="anchor" href="#_configuration"></a>3. Build Configuration</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_gradle"><a class="anchor" href="#_gradle"></a>3.1. Gradle</h3>
+<div class="paragraph">
+<p>You have two options for configuring this plugin: automatic and manual.</p>
+</div>
+<div class="sect3">
+<h4 id="_automatic"><a class="anchor" href="#_automatic"></a>3.1.1. Automatic</h4>
+<div class="paragraph">
+<p>As long as the project has the <code>org.codehaus.griffon.griffon</code> plugin applied to it you
+may include the following snippet in <code>build.gradle</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="groovy">dependencies {
+    griffon 'org.codehaus.griffon.plugins:griffon-rmi-plugin:1.0.0'
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>griffon</code> plugin will take care of the rest given its configuration.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_manual"><a class="anchor" href="#_manual"></a>3.1.2. Manual</h4>
+<div class="paragraph">
+<p>You will need to configure any of the following blocks depending on your setup</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="groovy">dependencies {
+    compile 'org.codehaus.griffon.plugins:griffon-rmi-core:1.0.0'
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Compile Only</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="groovy">dependencies {
+    compileOnly 'org.codehaus.griffon.plugins:griffon-rmi-groovy-compile:1.0.0'
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_maven"><a class="anchor" href="#_maven"></a>3.2. Maven</h3>
+<div class="paragraph">
+<p>First configure the <code>griffon-rmi-plugin</code> BOM in your POM file, by placing the following
+snippet before the <code>&lt;build&gt;</code> element</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="xml"><span class="tag">&lt;dependencyManagement&gt;</span>
+    <span class="tag">&lt;dependencies&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.codehaus.griffon.plugins<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>griffon-rmi-plugin<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;version&gt;</span>1.0.0<span class="tag">&lt;/version&gt;</span>
+            <span class="tag">&lt;type&gt;</span>pom<span class="tag">&lt;/type&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>import<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+    <span class="tag">&lt;/dependencies&gt;</span>
+<span class="tag">&lt;/dependencyManagement&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next configure dependencies as required by your particular setup</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.codehaus.griffon.plugins<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>griffon-rmi-core<span class="tag">&lt;/artifactId&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Provided scope</div>
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="xml"><span class="tag">&lt;dependency&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.codehaus.griffon.plugins<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>griffon-rmi-groovy-compile<span class="tag">&lt;/artifactId&gt;</span>
+<span class="tag">&lt;/dependency&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Don&#8217;t forget to configure all <code>-compile</code> dependencies with the maven-surefire-plugin, like so</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="xml"><span class="tag">&lt;plugin&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>maven-surefire-plugin<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;configuration&gt;</span>
+        <span class="tag">&lt;classpathDependencyExcludes&gt;</span>
+            <span class="tag">&lt;classpathDependencyExclude&gt;</span>
+                org.codehaus.griffon:griffon-rmi-groovy-compile
+            <span class="tag">&lt;/classpathDependencyExclude&gt;</span>
+        <span class="tag">&lt;/classpathDependencyExcludes&gt;</span>
+    <span class="tag">&lt;/configuration&gt;</span>
+<span class="tag">&lt;/plugin&gt;</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_modules"><a class="anchor" href="#_modules"></a>4. Modules</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following sections display all bindings per module. Use this information to
+successfully override a binding on your own modules or to troubleshoot a module
+binding if the wrong type has been applied by the Griffon runtime.</p>
+</div>
+<div class="sect2">
+<h3 id="_rmi"><a class="anchor" href="#_rmi"></a>4.1. Rmi</h3>
+<div class="paragraph">
+<p>Module name: <code>rmi</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight nowrap"><code data-lang="java">bind(RmiClientStorage.class)
+    .to(DefaultRmiClientStorage.class)
+    .asSingleton();
+
+bind(RmiClientFactory.class)
+    .to(DefaultRmiClientFactory.class)
+    .asSingleton();
+
+bind(RmiHandler.class)
+    .to(DefaultRmiHandler.class)
+    .asSingleton();
+
+bind(GriffonAddon.class)
+    .to(RmiAddon.class)
+    .asSingleton();</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_links"><a class="anchor" href="#_links"></a>5. Links</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="api/index.html" target="_blank">Javadoc</a></p>
+</div>
+<div class="paragraph">
+<p><a href="api-src/index.html" target="_blank">API Sources</a></p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 1.0.0<br>
+Last updated 2015-02-23 14:10:22 CET
+</div>
+</div>
+</body>
+</html>
