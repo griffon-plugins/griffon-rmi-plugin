@@ -39,11 +39,9 @@ public class JMXAwareRmiClient extends RmiClientDecorator {
 
     public void addObjectName(@Nonnull String objectName) {
         objectNames.add(requireNonBlank(objectName, ERROR_OBJECT_NAME_BLANK));
-        System.out.println("> "+objectNames);
     }
 
     public void removeObjectName(@Nonnull String objectName) {
-        System.out.println("< "+objectNames);
         objectNames.remove(requireNonBlank(objectName, ERROR_OBJECT_NAME_BLANK));
     }
 

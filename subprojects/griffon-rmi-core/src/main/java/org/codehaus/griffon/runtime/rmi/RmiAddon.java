@@ -20,14 +20,12 @@ package org.codehaus.griffon.runtime.rmi;
 import griffon.annotations.core.Nonnull;
 import griffon.core.GriffonApplication;
 import griffon.core.env.Metadata;
-import griffon.core.events.ShutdownStartEvent;
 import griffon.plugins.monitor.MBeanManager;
 import griffon.plugins.rmi.RmiClientStorage;
 import griffon.plugins.rmi.RmiHandler;
 import org.codehaus.griffon.runtime.core.addon.AbstractGriffonAddon;
 import org.codehaus.griffon.runtime.rmi.monitor.RmiClientStorageMonitor;
 
-import javax.application.event.EventHandler;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -53,8 +51,8 @@ public class RmiAddon extends AbstractGriffonAddon {
         mbeanManager.registerMBean(new RmiClientStorageMonitor(metadata, rmiClientStorage));
     }
 
-    @EventHandler
-    public void handleShutdownStartEvent(@Nonnull ShutdownStartEvent event) {
+    @Override
+    public void onShutdown(@Nonnull GriffonApplication application) {
         for (String clientId : rmiClientStorage.getKeys()) {
             rmiHandler.destroyRmiClient(clientId);
         }
