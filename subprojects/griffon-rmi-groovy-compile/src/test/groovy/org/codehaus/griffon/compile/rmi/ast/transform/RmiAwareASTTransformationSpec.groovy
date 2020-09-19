@@ -1,11 +1,13 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2014-2020 The author and/or original authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +31,8 @@ class RmiAwareASTTransformationSpec extends Specification {
         GroovyShell shell = new GroovyShell()
 
         when:
-        def bean = shell.evaluate('''
-        @griffon.transform.RmiAware
+        def bean = shell.evaluate('''import griffon.transform.rmi.RmiAware
+        @griffon.transform.rmi.RmiAware
         class Bean { }
         new Bean()
         ''')
@@ -40,9 +42,9 @@ class RmiAwareASTTransformationSpec extends Specification {
         RmiHandler.methods.every { Method target ->
             bean.class.declaredMethods.find { Method candidate ->
                 candidate.name == target.name &&
-                candidate.returnType == target.returnType &&
-                candidate.parameterTypes == target.parameterTypes &&
-                candidate.exceptionTypes == target.exceptionTypes
+                    candidate.returnType == target.returnType &&
+                    candidate.parameterTypes == target.parameterTypes &&
+                    candidate.exceptionTypes == target.exceptionTypes
             }
         }
     }
@@ -56,11 +58,12 @@ class RmiAwareASTTransformationSpec extends Specification {
         import griffon.plugins.rmi.*
         import griffon.plugins.rmi.exceptions.*
 
-        import javax.annotation.Nonnull
-        @griffon.transform.RmiAware
+        import griffon.annotations.core.Nonnull
+import griffon.transform.rmi.RmiAware
+        @griffon.transform.rmi.RmiAware
         class RmiHandlerBean implements RmiHandler {
             @Override
-            public <R> R withRmi(@Nonnull Map<String,Object> params,@Nonnull RmiClientCallback<R> callback) throws RmiException{
+             <R> R withRmi(@Nonnull Map<String,Object> params,@Nonnull RmiClientCallback<R> callback) throws RmiException{
                 return null
             }
             @Override

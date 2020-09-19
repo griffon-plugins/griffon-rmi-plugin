@@ -1,11 +1,13 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2014-2020 The author and/or original authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,15 +17,17 @@
  */
 package org.codehaus.griffon.runtime.rmi;
 
+import griffon.annotations.core.Nonnull;
 import griffon.core.GriffonApplication;
 import griffon.core.env.Metadata;
+import griffon.core.events.ShutdownStartEvent;
 import griffon.plugins.monitor.MBeanManager;
 import griffon.plugins.rmi.RmiClientStorage;
 import griffon.plugins.rmi.RmiHandler;
 import org.codehaus.griffon.runtime.core.addon.AbstractGriffonAddon;
-import org.codehaus.griffon.runtime.jmx.RmiClientStorageMonitor;
+import org.codehaus.griffon.runtime.rmi.monitor.RmiClientStorageMonitor;
 
-import javax.annotation.Nonnull;
+import javax.application.event.EventHandler;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -49,7 +53,8 @@ public class RmiAddon extends AbstractGriffonAddon {
         mbeanManager.registerMBean(new RmiClientStorageMonitor(metadata, rmiClientStorage));
     }
 
-    public void onShutdownStart(@Nonnull GriffonApplication application) {
+    @EventHandler
+    public void handleShutdownStartEvent(@Nonnull ShutdownStartEvent event) {
         for (String clientId : rmiClientStorage.getKeys()) {
             rmiHandler.destroyRmiClient(clientId);
         }

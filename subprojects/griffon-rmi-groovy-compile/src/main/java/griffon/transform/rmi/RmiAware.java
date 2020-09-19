@@ -15,19 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package griffon.transform.rmi;
 
-dependencies {
-    api 'org.codehaus.griffon.plugins:griffon-monitor-core:3.0.0-SNAPSHOT'
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    testImplementation("org.awaitility:awaitility-groovy:$awaitilityVersion") {
-        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
-        exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        exclude group: 'org.hamcrest', module: 'hamcrest-library'
-    }
-}
-
-jar {
-    manifest {
-        attributes('Automatic-Module-Name': project.group + '.rmi.core')
-    }
+/**
+ * <p>Annotates a class.</p>
+ *
+ * @author Andres Almiray
+ * @see griffon.plugins.rmi.RmiHandler
+ */
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.TYPE})
+public @interface RmiAware {
 }

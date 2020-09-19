@@ -24,7 +24,7 @@ import org.codehaus.groovy.ast.expr.MethodCallExpression
 
 supportsVersion(groovyEclipse: '2.5.1')
 
-contribute(enclosingClass(annotatedBy('griffon.transform.RmiAware'))) {
+contribute(enclosingClass(annotatedBy('griffon.transform.rmi.RmiAware'))) {
     provider = 'griffon-rmi'
     delegatesTo 'griffon.plugins.rmi.RmiHandler'
 }

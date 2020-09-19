@@ -1,11 +1,13 @@
 /*
- * Copyright 2014-2017 the original author or authors.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2014-2020 The author and/or original authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,8 +17,8 @@
  */
 package griffon.plugins.rmi;
 
-import griffon.core.test.GriffonUnitRule;
-import griffon.core.test.TestFor;
+import griffon.test.core.GriffonUnitRule;
+import griffon.test.core.TestFor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
