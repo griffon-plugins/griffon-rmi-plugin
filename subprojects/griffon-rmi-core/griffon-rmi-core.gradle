@@ -25,9 +25,3 @@ dependencies {
         exclude group: 'org.hamcrest', module: 'hamcrest-library'
     }
 }
-
-jar {
-    manifest {
-        attributes('Automatic-Module-Name': project.group + '.rmi.core')
-    }
-}
