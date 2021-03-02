@@ -9,5 +9,4 @@ out
 .project
 .classpath
 .settings
-.lazybones
-*.log
+.DS_Store
